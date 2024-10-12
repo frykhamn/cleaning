@@ -1,0 +1,11 @@
+/* src/styles/variables.css */
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #50e3c2;
+    --background-color: #f5f5f5;
+    --text-color: #333333;
+    --error-color: #e74c3c;
+    --input-border-color: #ccc;
+    --button-hover-color: #3a78c2;
+  }
+  
