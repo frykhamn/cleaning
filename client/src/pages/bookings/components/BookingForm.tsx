@@ -45,7 +45,7 @@ const BookingsForm: React.FC<BookingsFormProps> = ({ cleaners, onSubmit }) => {
         <Form className="booking-form">
           <h2>Boka Städning</h2>
 
-          <div className="form-group">
+          <div className="">
             <label htmlFor="date">Datum och Tid</label>
             <DatePicker
               selected={values.date}
@@ -54,6 +54,7 @@ const BookingsForm: React.FC<BookingsFormProps> = ({ cleaners, onSubmit }) => {
               dateFormat="Pp"
               timeCaption="Tid"
               locale={sv} 
+              inline
               id="date"
               name="date"
               placeholderText="Välj datum och tid"

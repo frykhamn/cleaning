@@ -1,18 +1,19 @@
 package com.cleaning.service.controllers;
 
-
-import com.cleaning.service.dto.LoginRequest;
-import com.cleaning.service.dto.UserRegisterRequest;
-import com.cleaning.service.dto.UserResponse;
-import com.cleaning.service.entities.User;
-import com.cleaning.service.services.CustomUserDetailsService;
-import com.cleaning.service.services.JwtUtil;
+import com.cleaning.service.dto.*;
+import com.cleaning.service.exceptions.UserAlreadyExistsException;
+import com.cleaning.service.exceptions.UserRegistrationException;
+import com.cleaning.service.security.CustomUserDetails;
+import com.cleaning.service.security.JwtUtil;
 import com.cleaning.service.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.*;
-
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,51 +21,72 @@ import java.util.List;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
+    private final UserService userService;
 
     @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
-
-    @Autowired
-    private UserService userService;
+    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UserService userService) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        this.userService = userService;
+    }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getUsers();
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        List<UserDto> users = userService.getUsers();
         return ResponseEntity.ok(users);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws Exception {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(), loginRequest.getPassword()
-                    )
-            );
-        } catch (DisabledException e) {
-            throw new Exception("User is disabled", e);
-        } catch (LockedException e) {
-            throw new Exception("User account is locked", e);
-        } catch (BadCredentialsException e) {
-            throw new Exception("Incorrect username or password", e);
-        }
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(), loginRequest.getPassword())
+        );
 
-        final UserDetails userDetails = userDetailsService
-                .loadUserByUsername(loginRequest.getUsername());
-System.out.println("userDetails: " + userDetails);
-        final String jwt = jwtUtil.generateToken(userDetails);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        return ResponseEntity.ok(jwt);
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        String jwt = jwtUtil.generateToken(userDetails);
+
+        return ResponseEntity.ok(new JwtResponse(jwt));
     }
+
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@RequestBody UserRegisterRequest userRegisterRequest) {
-        UserResponse response = userService.registerUser(userRegisterRequest);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<UserResponse> registerUser(@Validated @RequestBody UserRegisterRequest request) {
+        UserDto savedUser = userService.registerUser(request);
+
+        UserResponse response = new UserResponse();
+        response.setStatus("success");
+        response.setMessage("User registered successfully");
+        response.setUser(savedUser);
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+
+    // Exception Handlers
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<UserResponse> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
+        UserResponse response = new UserResponse();
+        response.setStatus("failed");
+        response.setMessage(ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(UserRegistrationException.class)
+    public ResponseEntity<UserResponse> handleUserRegistrationException(UserRegistrationException ex) {
+        UserResponse response = new UserResponse();
+        response.setStatus("failed");
+        response.setMessage(ex.getMessage());
+
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }
+
+

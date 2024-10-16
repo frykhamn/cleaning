@@ -1,5 +1,6 @@
 package com.cleaning.service.repositories;
 
+
 import com.cleaning.service.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -9,4 +10,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     User findByUsername(String username);
 
     List<User> findAllByUsername(String name);
+
+    User findByPublicId(String publicId);
 }

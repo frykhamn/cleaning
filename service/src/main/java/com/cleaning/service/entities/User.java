@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -17,6 +18,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
+    private String publicId;
+
     private String username;
     private String password;
     private String email;
@@ -26,4 +30,12 @@ public class User {
     private String phoneNumber;
 
     private Enum userRole;
+
+    /**
+     * PreResist skapar publicId innan användaren sparas i databasen
+     */
+    @PrePersist
+    public void generatePublicId() {
+        this.publicId = UUID.randomUUID().toString();
+    }
 }

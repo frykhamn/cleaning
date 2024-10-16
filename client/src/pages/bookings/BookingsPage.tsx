@@ -4,27 +4,21 @@ import BookingsForm from './components/BookingForm';
 import UpcomingBookings from './components/UpcomingBookings';
 import BookingHistory from './components/BookingHistory';
 import './BookingsPage.css';
+import { Booking, BookingStatus } from '../../types';
 
-interface Booking {
-  id: number;
-  date: Date;
-  cleaningType: string;
-  cleaner: string;
-}
 
 const mockCleaners = ['Anna', 'Erik', 'Maria'];
 
 const BookingsPage: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [history, setHistory] = useState<Booking[]>([]);
-  const [bookingIdCounter, setBookingIdCounter] = useState<number>(1);
 
-  const addBooking = (newBooking: Omit<Booking, 'id'>) => {
+  const customerName = 'Kundnamn';
+  const addBooking = (newBooking : Booking) => {
     setBookings((prev) => [
       ...prev,
-      { id: bookingIdCounter, ...newBooking },
+      { ...newBooking },
     ]);
-    setBookingIdCounter((prev) => prev + 1);
   };
 
   const editBooking = (editedBooking: Booking) => {
@@ -52,9 +46,12 @@ const BookingsPage: React.FC = () => {
         cleaners={mockCleaners}
         onSubmit={(values) => {
           addBooking({
+            id: Date.now(),
             date: values.date!,
             cleaningType: values.cleaningType,
+            customerName: customerName,
             cleaner: values.cleaner,
+            status: BookingStatus.Pending,
           });
         }}
       />
