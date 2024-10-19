@@ -1,12 +1,16 @@
 package com.cleaning.service.services;
 
-import com.cleaning.service.dto.UserDto;
+import com.cleaning.service.dto.BookingDTO;
+import com.cleaning.service.dto.UserDTO;
 import com.cleaning.service.dto.UserRegisterRequest;
+import com.cleaning.service.entities.Booking;
 import com.cleaning.service.entities.User;
 import com.cleaning.service.enums.UserRole;
 import com.cleaning.service.exceptions.UserAlreadyExistsException;
 import com.cleaning.service.exceptions.UserRegistrationException;
+import com.cleaning.service.mapper.BookingMapper;
 import com.cleaning.service.repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,12 +24,15 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    private final BookingMapper bookingMapper;
+
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, BookingMapper bookingMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.bookingMapper = bookingMapper;
     }
-    public UserDto registerUser(UserRegisterRequest userRegisterRequest) {
+    public UserDTO registerUser(UserRegisterRequest userRegisterRequest) {
         if (isUserExists(userRegisterRequest.getUsername())) {
             throw new UserAlreadyExistsException("User with name "
                     + userRegisterRequest.getUsername() + " already exists");
@@ -37,14 +44,30 @@ public class UserServiceImpl implements UserService {
         if (savedUser == null) {
             throw new UserRegistrationException("Failed to register user");
         }
-        return new UserDto(savedUser);
+        return new UserDTO(savedUser);
     }
 
+public List<BookingDTO> getCustomerBookings(Long userId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+    return user.getCustomerBookings().stream()
+            .map(bookingMapper::toDto)
+            .collect(Collectors.toList());
+}
 
-    public List<UserDto> getUsers() {
+public List<BookingDTO> getCleanerBookings(Long userId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+    return user.getCleanerBookings().stream()
+            .map(bookingMapper::toDto)
+            .collect(Collectors.toList());
+}
+
+
+    public List<UserDTO> getUsers() {
         List<User> users = userRepository.findAll();
         return users.stream()
-                .map(UserDto::new)
+                .map(UserDTO::new)
                 .collect(Collectors.toList());
     }
 

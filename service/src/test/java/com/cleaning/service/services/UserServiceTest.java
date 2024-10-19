@@ -1,6 +1,6 @@
 package com.cleaning.service.services;
 
-import com.cleaning.service.dto.UserDto;
+import com.cleaning.service.dto.UserDTO;
 import com.cleaning.service.dto.UserRegisterRequest;
 import com.cleaning.service.entities.User;
 import com.cleaning.service.enums.UserRole;
@@ -64,7 +64,7 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         // Act
-        UserDto result = userServiceImpl.registerUser(request);
+        UserDTO result = userServiceImpl.registerUser(request);
 
         // Assert
         assertNotNull(result);
@@ -140,7 +140,7 @@ class UserServiceTest {
         when(userRepository.findAll()).thenReturn(users);
 
         // Act
-        List<UserDto> result = userServiceImpl.getUsers();
+        List<UserDTO> result = userServiceImpl.getUsers();
 
         // Assert
         assertNotNull(result);

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -30,6 +31,14 @@ public class User {
     private String phoneNumber;
 
     private Enum userRole;
+
+
+    // Bidirektionell @OneToMany relation till Booking
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Booking> customerBookings;
+
+    @OneToMany(mappedBy = "cleaner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Booking> cleanerBookings;
 
     /**
      * PreResist skapar publicId innan användaren sparas i databasen

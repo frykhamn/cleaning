@@ -1,44 +1,24 @@
 // src/components/BookingsPage.tsx
-import React, { useState } from 'react';
-import BookingsForm from './components/BookingForm';
-import UpcomingBookings from './components/UpcomingBookings';
-import BookingHistory from './components/BookingHistory';
-import './BookingsPage.css';
-import { Booking, BookingStatus } from '../../types';
+import React, { useState } from "react";
+import BookingsForm from "./components/BookingForm";
+import UpcomingBookings from "./components/UpcomingBookings";
+import BookingHistory from "./components/BookingHistory";
+import "./BookingsPage.css";
+import { Booking, BookingStatus } from "../../types";
+import { useBookings } from "../../context/BookingsContext";
 
-
-const mockCleaners = ['Anna', 'Erik', 'Maria'];
+const mockCleaners = ["Anna", "Erik", "Maria"];
+const customerName = "John Doe";
 
 const BookingsPage: React.FC = () => {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [history, setHistory] = useState<Booking[]>([]);
-
-  const customerName = 'Kundnamn';
-  const addBooking = (newBooking : Booking) => {
-    setBookings((prev) => [
-      ...prev,
-      { ...newBooking },
-    ]);
-  };
-
-  const editBooking = (editedBooking: Booking) => {
-    setBookings((prev) =>
-      prev.map((booking) => (booking.id === editedBooking.id ? editedBooking : booking))
-    );
-  };
-
-  const deleteBooking = (id: number) => {
-    setBookings((prev) => prev.filter((booking) => booking.id !== id));
-  };
-
-  const moveToHistory = (booking: Booking) => {
-    deleteBooking(booking.id);
-    setHistory((prev) => [...prev, booking]);
-  };
-
-  const deleteHistoryItems = (ids: number[]) => {
-    setHistory((prev) => prev.filter((booking) => !ids.includes(booking.id)));
-  };
+  const {
+    bookings,
+    history,
+    addBooking,
+    editBooking,
+    removeBooking,
+    deleteHistoryItems,
+  } = useBookings();
 
   return (
     <div className="bookings-page">
@@ -61,14 +41,19 @@ const BookingsPage: React.FC = () => {
         onEdit={(booking) => {
           // Implementera redigeringslogik här
           // Detta kan inkludera att öppna ett modalformulär för att redigera bokningen
-          alert(`Redigera funktionalitet för bokning ${booking.id} kommer snart.`);
+          alert(
+            `Redigera funktionalitet för bokning ${booking.id} kommer snart.`
+          );
         }}
         onDelete={(id) => {
-          deleteBooking(id);
+          removeBooking(id);
         }}
       />
 
-      <BookingHistory bookings={history} onDeleteSelected={deleteHistoryItems} />
+      <BookingHistory
+        bookings={history}
+        onDeleteSelected={deleteHistoryItems}
+      />
     </div>
   );
 };

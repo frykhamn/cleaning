@@ -9,6 +9,6 @@ public class UserResponse {
 
 private String status;
 private String message;
-private UserDto user;
+private UserDTO user;
 
 }

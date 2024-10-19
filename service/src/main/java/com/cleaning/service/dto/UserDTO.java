@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class UserDto {
+public class UserDTO {
 
     private String publicId;
     private String username;
@@ -16,7 +16,7 @@ public class UserDto {
     private String phoneNumber;
     private Enum userRole;
 
-    public UserDto(User user) {
+    public UserDTO(User user) {
         this.publicId = user.getPublicId();
         this.username = user.getUsername();
         this.email = user.getEmail();

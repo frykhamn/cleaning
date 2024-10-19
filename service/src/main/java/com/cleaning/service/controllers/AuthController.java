@@ -33,8 +33,8 @@ public class AuthController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-        List<UserDto> users = userService.getUsers();
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<UserDTO> users = userService.getUsers();
         return ResponseEntity.ok(users);
     }
 
@@ -57,7 +57,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> registerUser(@Validated @RequestBody UserRegisterRequest request) {
-        UserDto savedUser = userService.registerUser(request);
+        UserDTO savedUser = userService.registerUser(request);
 
         UserResponse response = new UserResponse();
         response.setStatus("success");
