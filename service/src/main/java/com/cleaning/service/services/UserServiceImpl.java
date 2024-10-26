@@ -24,13 +24,12 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private final BookingMapper bookingMapper;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, BookingMapper bookingMapper) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.bookingMapper = bookingMapper;
+
     }
     public UserDTO registerUser(UserRegisterRequest userRegisterRequest) {
         if (isUserExists(userRegisterRequest.getUsername())) {
@@ -47,21 +46,7 @@ public class UserServiceImpl implements UserService {
         return new UserDTO(savedUser);
     }
 
-public List<BookingDTO> getCustomerBookings(Long userId) {
-    User user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
-    return user.getCustomerBookings().stream()
-            .map(bookingMapper::toDto)
-            .collect(Collectors.toList());
-}
 
-public List<BookingDTO> getCleanerBookings(Long userId) {
-    User user = userRepository.findById(userId)
-            .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
-    return user.getCleanerBookings().stream()
-            .map(bookingMapper::toDto)
-            .collect(Collectors.toList());
-}
 
 
     public List<UserDTO> getUsers() {
