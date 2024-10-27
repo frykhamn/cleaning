@@ -24,17 +24,14 @@ public class BookingController {
     private UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<BookingDTO> createBooking(@RequestBody CreateBookingRequest createBookingRequest, @AuthenticationPrincipal UserDetails userDetails) {
-        // Fetch the logged-in user
-        User user = userRepository.findByUsername(userDetails.getUsername());
-        // Set the logged-in user as the customer of the booking
-        booking.setCustomer(user);
-        BookingDTO createdBooking = bookingService.createBooking(createdBooking);
+    public ResponseEntity<BookingResponse> createBooking(@RequestBody CreateBookingRequest createBookingRequest, @AuthenticationPrincipal UserDetails userDetails) {
+
+        BookingDTO createdBooking = bookingService.createBooking(createBookingRequest, userDetails);
 
         BookingResponse response = new BookingResponse();
         response.setMessage("Booking created successfully");
         response.setStatus("success");
-        response.setBooking(booking);
+        response.setBooking(createdBooking);
 
         return ResponseEntity.ok(response);
     }
@@ -43,5 +40,17 @@ public class BookingController {
     public List<Booking> getBookings(@AuthenticationPrincipal UserDetails userDetails) {
         // Hämta bokningar för inloggad användare
         return bookingService.getBookingsForUser(2324L);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BookingResponse> getBookingById(@PathVariable Long id) {
+        BookingDTO bookingDTO = bookingService.getBookingById(id);
+
+        BookingResponse response = new BookingResponse();
+        response.setMessage("Booking retrieved successfully");
+        response.setStatus("success");
+        response.setBooking(bookingDTO);
+
+        return ResponseEntity.ok(response);
     }
 }

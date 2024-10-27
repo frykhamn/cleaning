@@ -1,17 +1,33 @@
 package com.cleaning.service.dto;
 
-import com.cleaning.service.entities.Address;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 public class CreateBookingRequest {
-    
-    private String dateTime;
+
+    @NotNull(message = "Datum och tid måste anges")
+    @Future(message = "Datum och tid måste vara i framtiden")
+    private LocalDateTime dateTime;
+
+    @Size(max = 500, message = "Anteckningar får inte överstiga 500 tecken")
     private String notes;
-    private Long customerId;
-    private Long cleanerId;
+
+    @NotNull(message = "Typ av städning måste anges")
     private Long cleaningTypeId;
-    private Address address;
+
+    @NotNull(message = "Städare måste anges")
+    private Long cleanerId;
+
+    @NotNull(message = "Adress måste anges")
+    private Long addressId;
+
+    private Long customerId;
 }

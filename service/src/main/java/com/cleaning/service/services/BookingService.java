@@ -1,6 +1,8 @@
 package com.cleaning.service.services;
 
 import com.cleaning.service.dto.BookingDTO;
+import com.cleaning.service.dto.BookingResponse;
+import com.cleaning.service.dto.CreateBookingRequest;
 import com.cleaning.service.entities.Booking;
 import com.cleaning.service.entities.User;
 import com.cleaning.service.mapper.BookingMapper;
@@ -8,6 +10,7 @@ import com.cleaning.service.repositories.BookingRepository;
 import com.cleaning.service.repositories.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +32,25 @@ public class BookingService {
         this.bookingMapper = bookingMapper;
     }
 
-    public BookingDTO createBooking(Booking booking) {
+    public BookingDTO createBooking(CreateBookingRequest createBookingRequest, UserDetails userDetails) {
+        // Hämta den inloggade användarens ID
+        Long userId = getLoggedInUserId(userDetails);
+
+        // Map CreateBookingRequest to Booking entity
+        Booking booking = bookingMapper.toEntity(createBookingRequest);
+
+        // Set the customer ID in the Booking entity
+        booking.setCustomer(userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId)));
+
+        // Spara bokningen i databasen
         Booking savedBooking = bookingRepository.save(booking);
-        return savedBooking != null ? bookingMapper.toDto(savedBooking) : null;
+
+        // Mappa den sparade Booking entiteten till BookingDTO
+        return savedBooking != null ? bookingMapper.toDTO(savedBooking) : null;
     }
 
-    public List<BookingDTO> getCustomerBookings(Long userId) {
+/*    public List<BookingDTO> getCustomerBookings(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
         return user.getCustomerBookings().stream()
@@ -48,9 +64,22 @@ public class BookingService {
         return user.getCleanerBookings().stream()
                 .map(bookingMapper::toDto)
                 .collect(Collectors.toList());
+    }*/
+
+    private Long getLoggedInUserId(UserDetails userDetails) {
+        return userRepository.findByUsername(userDetails.getUsername()).getId();
+    }
+
+
+    public BookingDTO getBookingById(Long id) {
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Bokning inte hittad med ID: " + id));
+        return bookingMapper.toDTO(booking);
     }
 
     public List<Booking> getBookingsForUser(Long userId) {
         return bookingRepository.findByCustomerId(userId);
     }
+
+
 }
