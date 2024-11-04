@@ -4,9 +4,8 @@ import com.cleaning.service.dto.BookingDTO;
 import com.cleaning.service.dto.BookingResponse;
 import com.cleaning.service.dto.CreateBookingRequest;
 import com.cleaning.service.entities.Booking;
-import com.cleaning.service.entities.User;
 import com.cleaning.service.repositories.UserRepository;
-import com.cleaning.service.services.BookingService;
+import com.cleaning.service.services.BookingServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,7 +17,7 @@ import java.util.List;
 @RequestMapping("/bookings")
 public class BookingController {
     @Autowired
-    private BookingService bookingService;
+    private BookingServiceImpl bookingService;
 
     @Autowired
     private UserRepository userRepository;
@@ -36,10 +35,17 @@ public class BookingController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping
-    public List<Booking> getBookings(@AuthenticationPrincipal UserDetails userDetails) {
+ /*   @GetMapping
+    public List<Booking> getBookingsByUserId(@AuthenticationPrincipal UserDetails userDetails) {
         // Hämta bokningar för inloggad användare
         return bookingService.getBookingsForUser(2324L);
+    }*/
+
+    @GetMapping
+    public ResponseEntity<List<BookingDTO>> getBookings() {
+        List<BookingDTO> bookingList = bookingService.findAll();
+        return ResponseEntity.ok(bookingList);
+
     }
 
     @GetMapping("/{id}")

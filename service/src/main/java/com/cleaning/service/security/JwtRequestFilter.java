@@ -27,6 +27,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
+        System.out.println("JwtRequestFilter anropat för URL: " + request.getRequestURI());
+
+
         String token = getJwtFromRequest(request);
 
         if (StringUtils.hasText(token) && jwtUtil.validateToken(token)) {
@@ -40,6 +43,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println("Autentisering satt för användare: " + userDetails.getUsername());
+        } else {
+            System.out.println("Ingen giltig JWT-token hittades i förfrågan");
         }
 
         chain.doFilter(request, response);
@@ -47,6 +53,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7); // Ta bort "Bearer " för att få själva token
+        }
         return null;
     }
+
 }

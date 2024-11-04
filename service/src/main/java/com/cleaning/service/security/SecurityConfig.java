@@ -42,6 +42,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/auth/**", "/h2-console/**").permitAll()
+                        .requestMatchers("/bookings/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/cleaner/**").hasAuthority("CLEANER")
 

@@ -34,7 +34,7 @@ public class Booking {
     @JoinColumn(name = "cleaning_type_id")
     private CleaningType cleaningType;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "address_id")
     private Address address;
 
